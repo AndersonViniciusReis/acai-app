@@ -169,6 +169,7 @@ export default function AcaiOrderingSystem() {
   const [isLoading, setIsLoading] = useState(false)
   const [products, setProducts] = useState<AcaiProduct[]>([])
   const [complements, setComplements] = useState<any[]>([])
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
   // Carregar dados do Supabase
   useEffect(() => {
@@ -178,12 +179,69 @@ export default function AcaiOrderingSystem() {
   }, [])
 
   const loadProducts = async () => {
+    setIsLoadingProducts(true)
     try {
       const data = await getProducts()
-      setProducts(data || [])
+
+      // Se conseguiu carregar do Supabase, usar os dados
+      if (data && data.length > 0) {
+        // Converter dados do Supabase para o formato esperado
+        const formattedProducts = data.map((product) => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          sizes: product.sizes, // Já vem como JSON do banco
+          image: product.image_url || "/placeholder.svg?height=200&width=200",
+          category: product.category,
+        }))
+        setProducts(formattedProducts)
+      } else {
+        // Fallback para produtos estáticos
+        setProducts([
+          {
+            id: "1",
+            name: "Açaí Tradicional",
+            description: "Açaí puro e cremoso, direto da Amazônia",
+            sizes: [
+              { size: "P", price: 8.5, ml: "300ml" },
+              { size: "M", price: 12.0, ml: "500ml" },
+              { size: "G", price: 16.5, ml: "700ml" },
+              { size: "GG", price: 22.0, ml: "1L" },
+            ],
+            image: "/placeholder.svg?height=200&width=200",
+            category: "acai",
+          },
+          {
+            id: "2",
+            name: "Açaí Premium",
+            description: "Açaí especial com polpa selecionada",
+            sizes: [
+              { size: "P", price: 10.0, ml: "300ml" },
+              { size: "M", price: 14.5, ml: "500ml" },
+              { size: "G", price: 19.0, ml: "700ml" },
+              { size: "GG", price: 25.0, ml: "1L" },
+            ],
+            image: "/placeholder.svg?height=200&width=200",
+            category: "acai",
+          },
+          {
+            id: "3",
+            name: "Açaí Gourmet",
+            description: "Nossa receita especial com ingredientes premium",
+            sizes: [
+              { size: "P", price: 12.0, ml: "300ml" },
+              { size: "M", price: 16.5, ml: "500ml" },
+              { size: "G", price: 21.0, ml: "700ml" },
+              { size: "GG", price: 28.0, ml: "1L" },
+            ],
+            image: "/placeholder.svg?height=200&width=200",
+            category: "acai",
+          },
+        ])
+      }
     } catch (error) {
       console.error("Erro ao carregar produtos:", error)
-      // Fallback para produtos estáticos se houver erro
+      // Fallback para produtos estáticos em caso de erro
       setProducts([
         {
           id: "1",
@@ -211,28 +269,64 @@ export default function AcaiOrderingSystem() {
           image: "/placeholder.svg?height=200&width=200",
           category: "acai",
         },
+        {
+          id: "3",
+          name: "Açaí Gourmet",
+          description: "Nossa receita especial com ingredientes premium",
+          sizes: [
+            { size: "P", price: 12.0, ml: "300ml" },
+            { size: "M", price: 16.5, ml: "500ml" },
+            { size: "G", price: 21.0, ml: "700ml" },
+            { size: "GG", price: 28.0, ml: "1L" },
+          ],
+          image: "/placeholder.svg?height=200&width=200",
+          category: "acai",
+        },
       ])
+    } finally {
+      setIsLoadingProducts(false)
     }
   }
 
   const loadComplements = async () => {
     try {
       const data = await getComplements()
-      setComplements(data || [])
+
+      if (data && data.length > 0) {
+        setComplements(data)
+      } else {
+        // Fallback para complementos estáticos
+        setComplements([
+          { id: "granola", name: "Granola Crocante", price: 2.0 },
+          { id: "banana", name: "Banana Fresca", price: 1.5 },
+          { id: "morango", name: "Morango", price: 2.5 },
+          { id: "leite-condensado", name: "Leite Condensado", price: 1.0 },
+          { id: "leite-po", name: "Leite em Pó", price: 1.0 },
+          { id: "amendoim", name: "Amendoim", price: 2.0 },
+          { id: "castanha", name: "Castanha do Pará", price: 3.0 },
+          { id: "coco", name: "Coco Ralado", price: 1.5 },
+          { id: "nutella", name: "Nutella", price: 4.0 },
+          { id: "paçoca", name: "Paçoca", price: 2.5 },
+          { id: "kiwi", name: "Kiwi", price: 2.0 },
+          { id: "manga", name: "Manga", price: 2.0 },
+        ])
+      }
     } catch (error) {
       console.error("Erro ao carregar complementos:", error)
       // Fallback para complementos estáticos
       setComplements([
-        { id: "granola", name: "Granola", price: 2.0 },
-        { id: "banana", name: "Banana", price: 1.5 },
+        { id: "granola", name: "Granola Crocante", price: 2.0 },
+        { id: "banana", name: "Banana Fresca", price: 1.5 },
         { id: "morango", name: "Morango", price: 2.5 },
         { id: "leite-condensado", name: "Leite Condensado", price: 1.0 },
         { id: "leite-po", name: "Leite em Pó", price: 1.0 },
         { id: "amendoim", name: "Amendoim", price: 2.0 },
-        { id: "castanha", name: "Castanha", price: 3.0 },
+        { id: "castanha", name: "Castanha do Pará", price: 3.0 },
         { id: "coco", name: "Coco Ralado", price: 1.5 },
         { id: "nutella", name: "Nutella", price: 4.0 },
         { id: "paçoca", name: "Paçoca", price: 2.5 },
+        { id: "kiwi", name: "Kiwi", price: 2.0 },
+        { id: "manga", name: "Manga", price: 2.0 },
       ])
     }
   }
@@ -454,39 +548,53 @@ export default function AcaiOrderingSystem() {
         {/* Products Grid */}
         <section>
           <h3 className="text-2xl font-bold text-gray-800 mb-6">Nossos Açaís</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <Card key={product.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <img
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                  />
-                  <CardTitle className="text-xl">{product.name}</CardTitle>
-                  <CardDescription>{product.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 mb-4">
-                    {product.sizes.map((size) => (
-                      <div key={size.size} className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">
-                          {size.size} ({size.ml})
-                        </span>
-                        <span className="font-semibold text-purple-600">R$ {size.price.toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    onClick={() => setSelectedProduct(product)}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  >
-                    Personalizar Pedido
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+
+          {isLoadingProducts ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+              <span className="ml-3 text-gray-600">Carregando produtos...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <img
+                      src={product.image || "/placeholder.svg"}
+                      alt={product.name}
+                      className="w-full h-48 object-cover rounded-lg mb-4"
+                    />
+                    <CardTitle className="text-xl">{product.name}</CardTitle>
+                    <CardDescription>{product.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 mb-4">
+                      {product.sizes.map((size) => (
+                        <div key={size.size} className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">
+                            {size.size} ({size.ml})
+                          </span>
+                          <span className="font-semibold text-purple-600">R$ {size.price.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() => setSelectedProduct(product)}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    >
+                      Personalizar Pedido
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {!isLoadingProducts && products.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Nenhum produto disponível no momento.</p>
+            </div>
+          )}
         </section>
       </main>
 
