@@ -168,7 +168,7 @@ export default function AcaiOrderingSystem() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [products, setProducts] = useState<AcaiProduct[]>([])
-  const [complements, setComplements] = useState<any[]>([])
+  const [complements, setComplements] = useState<Array<{ id: string; name: string; price: number }>>([])
   const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
   // Carregar dados do Supabase
@@ -362,7 +362,7 @@ export default function AcaiOrderingSystem() {
   }, [customerData])
 
   // Resto das funções permanecem iguais até sendOrder
-  const addToCart = (product: AcaiProduct, size: string, complements: string[]) => {
+  const addToCart = (product: AcaiProduct, size: string, selectedComplementIds: string[]) => {
     const sizeInfo = product.sizes.find((s) => s.size === size)
     if (!sizeInfo) return
 
@@ -556,37 +556,38 @@ export default function AcaiOrderingSystem() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <Card key={product.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <img
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
-                    <CardTitle className="text-xl">{product.name}</CardTitle>
-                    <CardDescription>{product.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 mb-4">
-                      {product.sizes.map((size) => (
-                        <div key={size.size} className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">
-                            {size.size} ({size.ml})
-                          </span>
-                          <span className="font-semibold text-purple-600">R$ {size.price.toFixed(2)}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <Button
-                      onClick={() => setSelectedProduct(product)}
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                    >
-                      Personalizar Pedido
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+              {products.length > 0 &&
+                products.map((product) => (
+                  <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <img
+                        src={product.image || "/placeholder.svg"}
+                        alt={product.name}
+                        className="w-full h-48 object-cover rounded-lg mb-4"
+                      />
+                      <CardTitle className="text-xl">{product.name}</CardTitle>
+                      <CardDescription>{product.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 mb-4">
+                        {product.sizes.map((size) => (
+                          <div key={size.size} className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">
+                              {size.size} ({size.ml})
+                            </span>
+                            <span className="font-semibold text-purple-600">R$ {size.price.toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        onClick={() => setSelectedProduct(product)}
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      >
+                        Personalizar Pedido
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           )}
 
@@ -885,9 +886,14 @@ export default function AcaiOrderingSystem() {
               </div>
             </div>
 
-            <Button onClick={sendOrder} className="w-full bg-green-600 hover:bg-green-700 text-white" size="lg">
+            <Button
+              onClick={sendOrder}
+              disabled={isLoading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              size="lg"
+            >
               <Phone className="w-4 h-4 mr-2" />
-              Enviar Pedido via WhatsApp
+              {isLoading ? "Enviando..." : "Enviar Pedido via WhatsApp"}
             </Button>
           </div>
         </DialogContent>

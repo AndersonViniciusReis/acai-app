@@ -36,6 +36,7 @@ export interface Complement {
   id: string
   name: string
   price: number
+  active?: boolean
 }
 
 export interface OrderData {
@@ -80,4 +81,10 @@ export interface DatabaseOrderItem {
   complements: string[]
   complements_price: number
   created_at: string
+}
+
+export interface LoadingState {
+  products: boolean
+  complements: boolean
+  order: boolean
 }

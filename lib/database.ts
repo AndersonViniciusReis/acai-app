@@ -1,5 +1,5 @@
 import { supabase } from "./supabase"
-import type { CartItem, CustomerData } from "./types"
+import type { CartItem, CustomerData, AcaiProduct, Complement } from "./types"
 
 // Funções para gerenciar clientes
 export async function createOrUpdateCustomer(customerData: CustomerData) {
@@ -98,7 +98,7 @@ export async function createOrder(
 }
 
 // Função para buscar produtos
-export async function getProducts() {
+export async function getProducts(): Promise<AcaiProduct[]> {
   try {
     const { data, error } = await supabase
       .from("products")
@@ -107,15 +107,24 @@ export async function getProducts() {
       .order("created_at", { ascending: true })
 
     if (error) throw error
-    return data
+
+    // Converter dados do Supabase para o formato esperado
+    return (data || []).map((product) => ({
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      sizes: product.sizes,
+      image: product.image_url || "/placeholder.svg?height=200&width=200",
+      category: product.category as "acai" | "complemento" | "bebida",
+    }))
   } catch (error) {
     console.error("Erro ao buscar produtos:", error)
-    throw error
+    return []
   }
 }
 
 // Função para buscar complementos
-export async function getComplements() {
+export async function getComplements(): Promise<Complement[]> {
   try {
     const { data, error } = await supabase
       .from("complements")
@@ -124,10 +133,10 @@ export async function getComplements() {
       .order("name", { ascending: true })
 
     if (error) throw error
-    return data
+    return data || []
   } catch (error) {
     console.error("Erro ao buscar complementos:", error)
-    throw error
+    return []
   }
 }
 
